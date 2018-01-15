@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void click01(View v) {
+        //建立執行緒下載圖片
         new Thread() {
             @Override
             public void run() {
@@ -43,21 +44,22 @@ public class MainActivity extends AppCompatActivity {
                     conn.connect();
                     InputStream inputStream = conn.getInputStream();
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    byte[] buf = new byte[1024];
-                    int length;
+                    byte[] buf = new byte[1024];    //設定一次下載1024byte
+                    int length;                     //設定讀取長度
+                    //讀取完畢時=-1
                     while((length = inputStream.read(buf)) != -1) {
-                        bos.write(buf,0,length);
+                        bos.write(buf,0,length); //將圖片資料寫入bos裡
                     }
-                    byte[] results = bos.toByteArray();
+                    byte[] results = bos.toByteArray(); //將bos的圖片資料轉成陣列存到results
+                    //將results轉成圖片格式存到bmp
                     final Bitmap bmp = BitmapFactory.decodeByteArray(results,0,results.length);
+                    //顯示圖片需在主執行緒執行
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            iv.setImageBitmap(bmp);
+                            iv.setImageBitmap(bmp); //秀出圖片
                         }
                     });
-
-
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (ProtocolException e) {
