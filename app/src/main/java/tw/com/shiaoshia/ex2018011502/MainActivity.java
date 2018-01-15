@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,12 +20,14 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     ImageView iv;
+    TextView tv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         iv = (ImageView)findViewById(R.id.imageView);
+        tv = (TextView)findViewById(R.id.textView);
     }
 
     public void click01(View v) {
@@ -45,10 +48,20 @@ public class MainActivity extends AppCompatActivity {
                     InputStream inputStream = conn.getInputStream();
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     byte[] buf = new byte[1024];    //設定一次下載1024byte
+                    final int totalLength = conn.getContentLength();  //讀取總長度
+                    int sum =0;                     //存放讀取進度
                     int length;                     //設定讀取長度
                     //讀取完畢時=-1
                     while((length = inputStream.read(buf)) != -1) {
+                        sum += length;  //存放讀取進度
+                        final int tmp = sum;    //暫存讀取進度
                         bos.write(buf,0,length); //將圖片資料寫入bos裡
+                        runOnUiThread(new Runnable() {  //回到主執行緒，顯示文字
+                            @Override
+                            public void run() {
+                                tv.setText(String.valueOf(tmp) + "/" + totalLength);
+                            }
+                        });
                     }
                     byte[] results = bos.toByteArray(); //將bos的圖片資料轉成陣列存到results
                     //將results轉成圖片格式存到bmp
