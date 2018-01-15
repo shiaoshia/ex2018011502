@@ -98,8 +98,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void click02(View v) {
-        iv.setVisibility(View.INVISIBLE);   //隱藏圖片
-        pb.setVisibility(View.VISIBLE);     //顯示下載條
         MyTask task = new MyTask();
         task.execute(10);   //設定計數10次
     }
@@ -134,6 +132,69 @@ public class MainActivity extends AppCompatActivity {
                 publishProgress(i); //將i執傳給onPreExecute
             }
             return "Okay";  //將執傳給onProgressUpdate
+        }
+    }
+
+    public void click03(View v) {
+        iv.setVisibility(View.INVISIBLE);   //隱藏圖片
+        pb.setVisibility(View.VISIBLE);     //顯示下載條
+        MyImageTask task = new MyImageTask();
+        task.execute("https://upload.wikimedia.org/wikipedia/en/f/f2/Ubercon_vlad_rgb_250.gif");
+    }
+
+    class MyImageTask extends AsyncTask<String,Integer,Bitmap> {
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            iv.setImageBitmap(bitmap);
+            pb.setVisibility(View.INVISIBLE);     //隱藏下載條
+            iv.setVisibility(View.VISIBLE);   //顯示圖片
+        }
+
+        @Override
+
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            pb.setProgress(values[0]);
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            String str_url = strings[0];
+            URL url;
+
+            try {
+                url = new URL(str_url);
+                HttpURLConnection conn = null;
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
+                InputStream inputStream = conn.getInputStream();
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                byte[] buf = new byte[1024];    //設定一次下載1024byte
+                final int totalLength = conn.getContentLength();  //讀取總長度
+                int sum =0;                     //存放讀取進度
+                int length;                     //設定讀取長度
+                //讀取完畢時=-1
+                while((length = inputStream.read(buf)) != -1) {
+                    sum += length;  //存放讀取進度
+                    final int tmp = sum;    //暫存讀取進度
+                    bos.write(buf,0,length); //將圖片資料寫入bos裡
+                    publishProgress(100*tmp/totalLength);   //告知onProgressUpdate目前進度
+                }
+                byte[] results = bos.toByteArray(); //將bos的圖片資料轉成陣列存到results
+                //將results轉成圖片格式存到bmp
+                final Bitmap bmp = BitmapFactory.decodeByteArray(results,0,results.length);
+                return bmp; //將圖片檔傳給onPostExecute
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 }
