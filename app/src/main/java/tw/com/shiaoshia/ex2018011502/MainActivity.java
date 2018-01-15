@@ -2,8 +2,10 @@ package tw.com.shiaoshia.ex2018011502;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,7 +23,7 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     ImageView iv;
-    TextView tv;
+    TextView tv,tv2,tv3;
     ProgressBar pb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
 
         iv = (ImageView)findViewById(R.id.imageView);
         tv = (TextView)findViewById(R.id.textView);
+        tv2 = (TextView)findViewById(R.id.textView2);
+        tv3 = (TextView)findViewById(R.id.textView3);
         pb = (ProgressBar)findViewById(R.id.progressBar);
     }
 
@@ -91,5 +95,45 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }.start();
+    }
+
+    public void click02(View v) {
+        iv.setVisibility(View.INVISIBLE);   //隱藏圖片
+        pb.setVisibility(View.VISIBLE);     //顯示下載條
+        MyTask task = new MyTask();
+        task.execute(10);   //設定計數10次
+    }
+
+    //AsyncTask為抽象類別，需繼承它，並實作利用泛型<Params,Progress,Result>
+    class MyTask extends AsyncTask<Integer,Integer,String> {
+
+        @Override //主執行緒執行，接收副執行緒傳過來的值
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            tv3.setText(s);
+        }
+
+        @Override   //主執行緒執行，當副執行緒結束會回傳值到這裡執行
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            //接收副執行緒執行完回傳的值
+            tv2.setText(String.valueOf(values[0]));
+        }
+
+        @Override   //在背景執行，副執行緒
+        protected String doInBackground(Integer... integers) {
+            int i;
+            //接收計數值
+            for(i=0;i<=integers[0];i++) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.d("TASK","doInBackground, i+" + i);
+                publishProgress(i); //將i執傳給onPreExecute
+            }
+            return "Okay";  //將執傳給onProgressUpdate
+        }
     }
 }
