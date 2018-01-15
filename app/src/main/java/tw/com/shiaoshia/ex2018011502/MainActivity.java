@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     ImageView iv;
     TextView tv;
+    ProgressBar pb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,9 +30,12 @@ public class MainActivity extends AppCompatActivity {
 
         iv = (ImageView)findViewById(R.id.imageView);
         tv = (TextView)findViewById(R.id.textView);
+        pb = (ProgressBar)findViewById(R.id.progressBar);
     }
 
     public void click01(View v) {
+        iv.setVisibility(View.INVISIBLE);   //隱藏圖片
+        pb.setVisibility(View.VISIBLE);     //顯示下載條
         //建立執行緒下載圖片
         new Thread() {
             @Override
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void run() {
                                 tv.setText(String.valueOf(tmp) + "/" + totalLength);
+                                pb.setProgress(100 * tmp / totalLength);    //顯示下載條進度
                             }
                         });
                     }
@@ -71,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             iv.setImageBitmap(bmp); //秀出圖片
+                            pb.setVisibility(View.INVISIBLE);   //隱藏下載條
+                            iv.setVisibility(View.VISIBLE);     //顯示圖片
                         }
                     });
                 } catch (MalformedURLException e) {
